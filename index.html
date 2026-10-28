@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AML Game Series List</title>
+<style>
+:root{--bg:#121214;--panel:#1a1a1e;--border:#303036;--text:#f5f5f7;--muted:#a4a4ad;--accent:#ff4757;--green:#2ed573}
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;display:flex;background:var(--bg);color:var(--text);font-family:"Segoe UI",Tahoma,sans-serif}
+.sidebar{width:245px;flex-shrink:0;padding:24px 18px;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column}
+.site-title{color:var(--accent);font-weight:800;font-size:1.1rem;line-height:1.4;letter-spacing:.7px;margin:0 8px 28px}
+.nav-links{list-style:none;display:grid;gap:7px}
+.nav-links a{display:block;padding:11px 13px;border-radius:7px;text-decoration:none;color:var(--muted)}
+.nav-links a:hover,.nav-links a.active{background:#2b2b31;color:white}
+.sidebar-note{margin-top:auto;padding:18px 8px 0;color:#777780;font-size:.78rem;line-height:1.5}
+main{flex:1;min-width:0;padding:34px}
+.topline{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px}
+h1{font-size:clamp(1.5rem,3vw,2rem)}.subtitle{color:var(--muted);margin-top:6px;font-size:.92rem}
+.pill{border:1px solid var(--border);border-radius:999px;padding:7px 11px;color:var(--muted);font-size:.8rem;white-space:nowrap}
+.stats-summary,.list-container{background:var(--panel);border:1px solid var(--border);border-radius:10px}
+.stats-summary{padding:18px 20px;margin-bottom:22px}.stats-title{font-weight:650;margin-bottom:8px}
+.stats-copy{color:var(--muted);font-size:.9rem;line-height:1.5}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;margin:0 20px 18px}
+input,select{min-height:42px;background:#111114;border:1px solid var(--border);border-radius:7px;color:var(--text);padding:0 12px;font:inherit;outline:none}
+input{flex:1;min-width:210px}select{min-width:160px}input:focus,select:focus{border-color:var(--accent)}
+.list-container{overflow:hidden}.list-heading{padding:20px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.list-heading h2{font-size:1.2rem}#result-count{color:var(--muted);font-size:.85rem}
+.table-wrap{overflow:auto;max-height:calc(100vh - 300px)}
+table{width:100%;border-collapse:collapse;text-align:left}
+thead{position:sticky;top:0;background:#151518;color:var(--muted);font-size:.76rem;text-transform:uppercase;letter-spacing:.05em;z-index:1}
+th,td{padding:12px 14px;border-top:1px solid var(--border);vertical-align:middle}
+tbody tr:hover{background:#242429}.rank{color:var(--accent);font-weight:800;white-space:nowrap}
+.mode-cell{display:flex;align-items:center;gap:12px;min-width:280px}
+.thumbnail{width:100px;height:56px;object-fit:cover;border-radius:5px;background:#303036;flex-shrink:0}
+.mode-name{font-weight:650;color:var(--text);text-decoration:none}.mode-name:hover{color:var(--accent)}
+.creator{font-size:.78rem;color:var(--muted);margin-top:4px}.game-name{color:#d1d1d6;min-width:180px}
+.points{font-weight:700;white-space:nowrap}.skill{color:var(--green)}.rng{color:#8db8ff}
+.empty{display:none;text-align:center;color:var(--muted);padding:32px 16px}
+footer{padding:18px 4px;color:#777780;font-size:.8rem;line-height:1.5}
+@media(max-width:800px){body{flex-direction:column}.sidebar{width:100%;padding:15px;border-right:0;border-bottom:1px solid var(--border)}.site-title{margin:0 5px 12px}.nav-links{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.nav-links a{padding:9px 8px;font-size:.85rem;text-align:center}.sidebar-note{display:none}main{padding:20px 13px}.topline{align-items:flex-start;flex-direction:column}.thumbnail{width:78px;height:44px}th,td{padding:10px}}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="site-title">AML Game Series List</div>
+  <ul class="nav-links">
+    <li><a class="active" href="#ranking">Mode ranking</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="https://allmodeslist.pages.dev/" target="_blank" rel="noopener noreferrer">Original AML ↗</a></li>
+  </ul>
+  <div class="sidebar-note">Community-made companion project.<br>Not affiliated with the official All Modes List.</div>
+</nav>
+<main>
+  <header class="topline"><div><h1>AML Game Series List</h1><p class="subtitle">Browse modes, games, placements and YouTube thumbnails.</p></div><span class="pill" id="data-badge">Chargement…</span></header>
+  <section class="stats-summary" id="about"><div class="stats-title">Data source</div><p class="stats-copy">Les données viennent en direct de l'API d'All Modes List via <code>/api/modes</code> et sont rafraîchies automatiquement toutes les 60 secondes (et au retour sur l'onglet). Les placements correspondent au champ <code>top</code> de l'API. Les valeurs Skill et RNG sont affichées séparément.</p></section>
+  <section class="list-container" id="ranking">
+    <div class="list-heading"><h2>Mode ranking</h2><span id="result-count">Loading…</span></div>
+    <div class="toolbar">
+      <input id="search" type="search" placeholder="Search a mode, game or creator…" aria-label="Search">
+      <select id="game-filter" aria-label="Filter by game"><option value="">All games</option></select>
+      <select id="sort" aria-label="Sort ranking"><option value="rank">Sort: placement</option><option value="skill">Sort: skill value</option><option value="rng">Sort: RNG value</option><option value="name">Sort: mode name</option></select>
+    </div>
+    <div class="table-wrap"><table><thead><tr><th>Rank</th><th>Mode / thumbnail</th><th>Game</th><th>Skill</th><th>RNG</th></tr></thead><tbody id="mode-list"></tbody></table><div class="empty" id="empty">No modes match your search.</div></div>
+  </section>
+  <footer>Data snapshot from the uploaded JSON file. This local HTML does not refresh itself from AML yet.</footer>
+</main>
+<script>
+const REFRESH_MS=60000;
+let modes=[],lastRaw="";
+const list=document.getElementById("mode-list"),search=document.getElementById("search"),gameFilter=document.getElementById("game-filter"),sort=document.getElementById("sort"),count=document.getElementById("result-count"),empty=document.getElementById("empty"),badge=document.getElementById("data-badge");
+const fmt=n=>Number(n||0).toLocaleString("en-US");
+const gameOf=m=>(m.game||"Unknown game").trim();
+function fillGames(){
+ const current=gameFilter.value;
+ while(gameFilter.options.length>1)gameFilter.remove(1);
+ [...new Set(modes.map(gameOf))].sort((a,b)=>a.localeCompare(b)).forEach(g=>{const o=document.createElement("option");o.value=g;o.textContent=g;gameFilter.appendChild(o)});
+ gameFilter.value=[...gameFilter.options].some(o=>o.value===current)?current:"";
+}
+function renderModes(){
+ const term=search.value.trim().toLowerCase();
+ let filtered=modes.filter(m=>[m.name,m.game,m.creator].some(v=>String(v||"").toLowerCase().includes(term))&&(!gameFilter.value||gameOf(m)===gameFilter.value));
+ if(sort.value==="skill")filtered.sort((a,b)=>(b.skillValue||0)-(a.skillValue||0));
+ else if(sort.value==="rng")filtered.sort((a,b)=>(b.rngValue||0)-(a.rngValue||0));
+ else if(sort.value==="name")filtered.sort((a,b)=>(a.name||"").localeCompare(b.name||""));
+ else filtered.sort((a,b)=>(a.top||Infinity)-(b.top||Infinity));
+ const fragment=document.createDocumentFragment();
+ for(const m of filtered){
+  const tr=document.createElement("tr"),rank=document.createElement("td");rank.className="rank";rank.textContent=m.top?("#"+m.top):"—";
+  const modeTd=document.createElement("td"),wrap=document.createElement("div");wrap.className="mode-cell";
+  const img=document.createElement("img");img.className="thumbnail";img.loading="lazy";img.alt="YouTube thumbnail: "+(m.name||"mode");
+  img.src=m.videoID?"https://img.youtube.com/vi/"+encodeURIComponent(m.videoID)+"/hqdefault.jpg":"";
+  img.onerror=()=>{img.style.visibility="hidden"};
+  const textWrap=document.createElement("div"),name=document.createElement("a");name.className="mode-name";name.textContent=m.name||"Unnamed mode";
+  if(m.link){name.href=m.link;name.target="_blank";name.rel="noopener noreferrer"}else{name.href="#"}
+  const creator=document.createElement("div");creator.className="creator";creator.textContent=m.creator?"by "+m.creator:"";
+  textWrap.append(name,creator);wrap.append(img,textWrap);modeTd.append(wrap);
+  const game=document.createElement("td");game.className="game-name";game.textContent=gameOf(m);
+  const skill=document.createElement("td");skill.className="points skill";skill.textContent=fmt(m.skillValue);
+  const rng=document.createElement("td");rng.className="points rng";rng.textContent=fmt(m.rngValue);
+  tr.append(rank,modeTd,game,skill,rng);fragment.append(tr);
+ }
+ list.replaceChildren(fragment);count.textContent=fmt(filtered.length)+" modes";empty.style.display=filtered.length?"none":"block";
+}
+const hhmm=()=>new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
+function applyData(text,label){
+ if(text===lastRaw){badge.textContent=fmt(modes.length)+" modes · "+label+" · vérifié à "+hhmm();return}
+ const data=JSON.parse(text);
+ if(!Array.isArray(data))throw new Error("Format inattendu");
+ modes=data;lastRaw=text;fillGames();renderModes();
+ badge.textContent=fmt(modes.length)+" modes · "+label+" · "+hhmm();
+}
+async function loadModes(){
+ try{
+  const r=await fetch("/api/modes",{cache:"no-store"});
+  if(!r.ok)throw new Error("HTTP "+r.status);
+  applyData(await r.text(),"en direct");
+ }catch(e){
+  if(modes.length){badge.textContent=fmt(modes.length)+" modes · API injoignable, dernières données conservées";return}
+  try{
+   const r=await fetch("modes.json");
+   if(!r.ok)throw new Error("HTTP "+r.status);
+   applyData(await r.text(),"instantané (hors ligne)");
+  }catch(e2){badge.textContent="Erreur de chargement";count.textContent="Erreur"}
+ }
+}
+search.addEventListener("input",renderModes);gameFilter.addEventListener("change",renderModes);sort.addEventListener("change",renderModes);
+setInterval(()=>{if(!document.hidden)loadModes()},REFRESH_MS);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)loadModes()});
+loadModes();
+</script>
+</body>
+</html>
